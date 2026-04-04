@@ -139,6 +139,8 @@ type Errno*{.pure.} = enum
   EXDEV = "Invalid cross-device link"
   EXFULL = "Exchange full"
 
+when defined(nimPreviewSlimSystem):
+  import std/assertions
 static: assert Errno is Ordinal
 const ErrnoCount* = 1 + ord(high Errno) - 1  # exclude E_SUCCESS
 
