@@ -4,7 +4,7 @@ import ./errnos
 import ./clike
 import ./varIfJs
 
-
+import ./strerrorImpl
 when varNotConst:
   import ./loopErrnoUnchk
 else:
@@ -48,4 +48,9 @@ macro initErrorcodeMap*(K, V; res: untyped, initFunc: typed) =
 
 template declErrorcodeWith*[K, V](initFunc: typed) =
   bind initErrorcodeMap
-  initErrorcodeMap K, V,errorcode, initFunc
+  bind strerrorAux
+  initErrorcodeMap K, V, errorcode, initFunc
+  proc strerror*(c: int): string =
+    when nimvm: strerrorAux(c, initTable[K, V](0))
+    else: strerrorAux(c, errorcode)
+
