@@ -1,19 +1,21 @@
 
 
 import ./errnos
-import ./loopErrno
 import ./clike
+import ./varIfJs
+
+
+when varNotConst:
+  import ./loopErrnoUnchk
+else:
+  import ./loopErrno
 export errnos
 
 import std/enumutils
 import std/macros
 
 macro initErrorcodeMap*(K, V; res: untyped, initFunc: typed) =
-  mixin `[]=`
   result = newStmtList()
-  let N = newLit ErrnoCount
-  result.add quote do:
-    var `res` = `initFunc`[`K`, `V`](`N`)
   #[
   XXX: NIM-BUG: if using `let` in forErrno loop (in Windows):
   errorcodeInit.nim(18, 7) Error: redefinition of 'errName'; previous declaration here: errorcodeInit.nim(18, 7)
@@ -21,26 +23,28 @@ macro initErrorcodeMap*(K, V; res: untyped, initFunc: typed) =
   var
     errName: string
     errNameNode, errId: NimNode
-  result.forErrno e:
-    errName = symbolName e
-    errNameNode = newLit errName
-    errId = ident errName
-    when CLike:
-      let addErrnoId = genSym(nskProc, errName)
-      # NOTE: just wrap in `res`[`errId`] = `errNameNode` directly in `#ifdef`
-      #   doesn't work, as `#ifdef ..  #endif` will not be placed right
-      #   around stmt, but
-      #   very early in the C file.
-      #  so we use a proc.
+  when varNotConst:
+    let N = newLit ErrnoCount
+    result.add quote do:
+      var `res` = `initFunc`[`K`, `V`](`N`)
+    forErrnoUnchk e:
+      errName = symbolName e
+      errNameNode = newLit errName
+      errId = ident errName
       result.add quote do:
-        proc `addErrnoId`(){.inline.} =
-          {.emit: "\n#ifdef " & `errNameNode` & "\n".}
-          `res`[`errId`] = `errNameNode`
-          {.emit: "\n#endif\n".}
-      result.add newCall(addErrnoId)
-    else:
-      result.add quote do:
-        `res`[`errId`] = `errNameNode`
+        `res`[`errId`] = `symbolName` `e`
+  else:
+    let lit = newNimNode nnkTableConstr
+    forErrno e:
+      errName = symbolName e
+      errNameNode = newLit errName
+      errId = ident errName
+      lit.add nnkExprColonExpr.newTree(
+        newCall("int", errId),
+        errNameNode
+      )
+    result.add quote do:
+      const `res` = `initFunc`[`K`, `V`](`lit`)
 
 template declErrorcodeWith*[K, V](initFunc: typed) =
   bind initErrorcodeMap

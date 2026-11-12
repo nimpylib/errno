@@ -14,3 +14,12 @@ suite "ErrnoAttributeTests":
     errnoEq EDOM
     errnoEq ERANGE
 
+suite "strerror":
+  test "invalid":
+    check strerror(-1) == "Unknown error -1"
+  test "static":
+    check static(strerror(-1)) == "Unknown error -1"
+
+  test "normal":
+    check strerror(EINVAL) == "Invalid argument"
+

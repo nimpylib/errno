@@ -22,4 +22,6 @@ template pylib(x, ver) =
            else: pylibPre & x
 
 pylib "handy_sugars", " ^= 0.1.0"
+pylib "autoconf_sugars", " ^= 0.1.0"
+pylib "jsbuiltins", " ^= 0.1.0"
 

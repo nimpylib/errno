@@ -1,7 +1,7 @@
 ## EXT. stable
 
 import ./private/[exportUtils, errorcodeInit, singleton_errno]
-export errorcodeInit, exportAllErrnosViaEnumOrImportc
+export errorcodeInit
 
 template prepareRWErrno*{.dirty.} = discard
 

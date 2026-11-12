@@ -95,6 +95,7 @@ type Errno*{.pure.} = enum
   ENOSTR = "Device not a stream"
   ENOSYS = "Function not implemented"
   ENOTBLK = "Block device required"
+  ENOTCAPABLE = "Capabilities insufficient"  ##  Availability: WASI, FreeBSD
   ENOTCONN = "Transport endpoint is not connected"
   ENOTDIR = "Not a directory"
   ENOTEMPTY = "Directory not empty"

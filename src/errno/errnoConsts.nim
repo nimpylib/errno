@@ -1,3 +1,3 @@
 
 import ./private/exportUtils
-exportAllErrnosViaEnumOrImportc()
+export exportUtils
